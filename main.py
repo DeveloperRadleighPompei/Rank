@@ -65,7 +65,7 @@ def create_or_update_gist(rank_data, gist_url):
 # Main function
 def main():
     # Gist URL
-    gist_url = 'https://gist.github.com/yourusername/yourgistid'
+    gist_url = 'https://gist.github.com/DeveloperRadleighPompei/75c476a3fc46d5402e33e3134cc0dc16'
     while True:
         # Scrape rank data
         rank, rank_progress = scrape_rank_data()
