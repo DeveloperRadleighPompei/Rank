@@ -1,3 +1,4 @@
+import os
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -56,16 +57,21 @@ def create_or_update_gist(rank_data, gist_url):
         # Gist API endpoint
         gist_api_url = f"https://api.github.com/gists/{gist_id}"
         # Personal Access Token
-        token = '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'
+        token = "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"  # Use environment variable for token
         headers = {'Authorization': f'token {token}'}
-        # Update the existing Gist
-        response = requests.patch(gist_api_url, headers=headers, json=gist_data)
-        # Check response status
-        if response.status_code == 200:
+        
+        # Check if the Gist already exists
+        response = requests.get(gist_api_url, headers=headers)
+        if response.status_code == 200:  # Gist exists, update it
+            response = requests.patch(gist_api_url, headers=headers, json=gist_data)
             print(f"Gist updated successfully. Gist ID: {gist_id}")
             return gist_id
+        elif response.status_code == 404:  # Gist doesn't exist, create it
+            response = requests.post("https://api.github.com/gists", headers=headers, json=gist_data)
+            print(f"Gist created successfully. Gist ID: {gist_id}")
+            return gist_id
         else:
-            print(f"Failed to update Gist. Status code: {response.status_code}")
+            print(f"Failed to create/update Gist. Status code: {response.status_code}")
             return None
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -79,11 +85,11 @@ def main():
         # Scrape rank data
         rank, rank_progress, rank_image, number_rank = scrape_rank_data()
         # Format rank data
-        rank_data = f"Rank: {rank}\nProgress: {rank_progress}\nRank Image: {rank_image}\n{rank}\n{rank_progress}\n{rank_image}\n{number_rank}"
+        rank_data = f"Rank: {rank}\nProgress: {rank_progress}\nRank Image: {rank_image}\nNumber Rank: {number_rank}"
         # Update Gist with rank data
         create_or_update_gist(rank_data, gist_url)
         # Wait for some time before scraping again (e.g., every hour)
-        time.sleep(60)
+        time.sleep(3600)  # Wait for an hour
 
 if __name__ == "__main__":
     main()
