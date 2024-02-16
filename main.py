@@ -17,20 +17,26 @@ def scrape_rank_data():
         chrome_options.add_argument("--headless")  # Run in headless mode
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
-        # Wait for the rank element to be visible
+        # Wait for the rank elements to be visible
         rank_element = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, '.profile-rank__value'))
+            EC.visibility_of_element_located((By.CSS_SELECTOR, '#overview > div.trn-grid.trn-grid__sidebar-right > aside > div.trn-grid.trn-grid--vertical > div.profile-current-ranks.trn-card.trn-card--no-overflow > div > div:nth-child(1) > div.profile-rank__container > div > div.profile-rank__value'))
         )
-        rank_progress_element = driver.find_element_by_css_selector('.profile-rank-progress')
+        rank_progress_element = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, '#overview > div.trn-grid.trn-grid__sidebar-right > aside > div.trn-grid.trn-grid--vertical > div.profile-current-ranks.trn-card.trn-card--no-overflow > div > div:nth-child(1) > div.profile-rank__container > div > div.profile-rank-progress'))
+        )
+        rank_image_element = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "#overview > div.trn-grid.trn-grid__sidebar-right > aside > div.trn-grid.trn-grid--vertical > div.profile-current-ranks.trn-card.trn-card--no-overflow > div > div:nth-child(1) > div.profile-rank__container > img")))
         # Extract rank and progress text
         rank = rank_element.text.strip()
         rank_progress = rank_progress_element.text.strip()
+        rank_image = rank_image_element.get_attribute("src")  # Get the 'src' attribute of the image element
+        number_rank = float(rank_progress.strip('%'))
         # Close the WebDriver
         driver.quit()
-        return rank, rank_progress
+        return rank, rank_progress, rank_image, number_rank
     except Exception as e:
         print(f"An error occurred: {e}")
-        return "N/A", "N/A"
+        return "N/A", "N/A", "N/A", "N/A"  # Return default values in case of error
 
 # Function to create or update a GitHub Gist
 def create_or_update_gist(rank_data, gist_url):
@@ -45,12 +51,15 @@ def create_or_update_gist(rank_data, gist_url):
                 }
             }
         }
-        # If Gist URL is provided, extract Gist ID
+        # Gist URL
         gist_id = gist_url.split('/')[-1]
         # Gist API endpoint
         gist_api_url = f"https://api.github.com/gists/{gist_id}"
-        # If GIST_ID environment variable exists, update the existing Gist
-        response = requests.patch(gist_api_url, json=gist_data)
+        # Personal Access Token
+        token = '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'
+        headers = {'Authorization': f'token {token}'}
+        # Update the existing Gist
+        response = requests.patch(gist_api_url, headers=headers, json=gist_data)
         # Check response status
         if response.status_code == 200:
             print(f"Gist updated successfully. Gist ID: {gist_id}")
@@ -68,13 +77,13 @@ def main():
     gist_url = 'https://gist.github.com/DeveloperRadleighPompei/75c476a3fc46d5402e33e3134cc0dc16'
     while True:
         # Scrape rank data
-        rank, rank_progress = scrape_rank_data()
+        rank, rank_progress, rank_image, number_rank = scrape_rank_data()
         # Format rank data
-        rank_data = f"Rank: {rank}\nProgress: {rank_progress}"
+        rank_data = f"Rank: {rank}\nProgress: {rank_progress}\nRank Image: {rank_image}\n{rank}\n{rank_progress}\n{rank_image}\n{number_rank}"
         # Update Gist with rank data
         create_or_update_gist(rank_data, gist_url)
         # Wait for some time before scraping again (e.g., every hour)
-        time.sleep(3600)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
