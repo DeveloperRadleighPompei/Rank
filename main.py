@@ -57,7 +57,7 @@ def create_or_update_gist(rank_data, gist_url):
         # Gist API endpoint
         gist_api_url = f"https://api.github.com/gists/{gist_id}"
         # Personal Access Token
-        token = "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"  # Use environment variable for token
+        token = os.getenv('A_GITHUB_TOKEN')  # Use environment variable for token
         headers = {'Authorization': f'token {token}'}
         
         # Check if the Gist already exists
