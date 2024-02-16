@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -71,13 +70,17 @@
       #line2 {
         position: absolute;
         color: white;
-        top: 35%;
-        left: 50%;
+        top: 37%; /* Change top value */
+        left: 54%;
+        transform: translate(-50%, -50%); /* Add transform property */
         z-index: 1;
         font-size: 30px;
         font-weight: bold;
         font-family: Arial, sans-serif; /* Change the font-family to whatever you prefer */
-      }
+    }
+
+
+
     </style>
   </head>
   <body>
@@ -93,24 +96,22 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Fetch data from GitHub Gist
-        fetch("https://gist.github.com/DeveloperRadleighPompei/4480d2e89306138863893254113b8b35#file-gist-txt")
+        // Fetch rank.txt
+        fetch("https://gist.githubusercontent.com/DeveloperRadleighPompei/75c476a3fc46d5402e33e3134cc0dc16/raw/rank.txt")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
             }
-            return response.json();
+            return response.text();
           })
-          .then((gist) => {
-            const files = gist.files;
-            const rankData = files["rank.txt"].content;
-            const lines = rankData.split("\n");
-            const percentage = parseFloat(lines[1]);
-            const imageUrl = lines[3];
+          .then((data) => {
+            const lines = data.split("\n");
+            const percentage = parseFloat(lines[6]);
+            const imageUrl = lines[5];
             console.log("Percentage:", percentage);
             console.log("Image URL:", imageUrl);
             const line1 = lines[0]; // Line 1 from rank.txt
-            const line2 = lines[2] + "%"; // Line 2 from rank.txt
+            const line2 = lines[4]; // Line 2 from rank.txt
             document.getElementById("line1").textContent = line1;
             document.getElementById("line2").textContent = line2;
             // Set custom property for percentage
@@ -132,3 +133,10 @@
     </script>
   </body>
 </html>
+<!-- Rank: Champion
+Progress: 40%
+Rank Image: https://trackercdn.com/cdn/fortnitetracker.com/icons/ranks/17.png
+Champion
+40%
+https://trackercdn.com/cdn/fortnitetracker.com/icons/ranks/17.png
+40.0 -->
